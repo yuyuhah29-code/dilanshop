@@ -20,9 +20,17 @@ const PRODUCTS = [
   { id: "p17", name: "Real Techniques Miracle Complexion Sponge", brand: "Real Techniques", price: 9000, category: "accessories", icon: "brush", accent: "#e08fae" },
   { id: "p18", name: "Professional Makeup Brush Set (12pc)", brand: "Dilan Shop", price: 32000, category: "accessories", icon: "brush", accent: "#c9a15a" }
 ];
-Dilan Shop
-Shop
-Admin
-Discover your glow
-Live preview — this reflects whatever is saved in Admin
 
+// If the admin panel has saved edits in this browser, use those instead.
+(function(){
+  try {
+    const saved = localStorage.getItem('dilanshop_products');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        PRODUCTS.length = 0;
+        PRODUCTS.push(...parsed);
+      }
+    }
+  } catch (e) { /* ignore corrupt data */ }
+})();
