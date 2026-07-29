@@ -1,4 +1,400 @@
-Dilan Shop Admin
-Enter the admin password to manage products.
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Dilan Shop</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  :root{ --admin-bg:#f7f4f6; }
+  body.admin-body{ background:var(--admin-bg); font-family:inherit; }
+  .admin-header{ background:var(--black); color:#fff; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+  .admin-header a{ color:#fff; text-decoration:none; }
+  .admin-header .logo-main{ font-weight:700; font-size:1.2rem; }
+  .admin-header .logo-main em{ color:var(--pink-light); font-style:normal; }
+  .admin-wrap{ max-width:1100px; margin:0 auto; padding:24px 16px 80px; }
 
-Log in
+  /* Login screen */
+  .login-screen{ min-height:70vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .login-card{ background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow-pop); padding:36px 32px; width:100%; max-width:360px; text-align:center; }
+  .login-card h1{ font-size:1.3rem; margin:0 0 6px; color:var(--ink); }
+  .login-card p{ color:var(--gray); font-size:0.9rem; margin:0 0 20px; }
+  .login-card input{ width:100%; padding:12px 14px; border:1px solid var(--gray-light); border-radius:var(--radius-sm); font-size:1rem; margin-bottom:12px; box-sizing:border-box; }
+  .login-card button{ width:100%; padding:12px; border:none; border-radius:var(--radius-sm); background:var(--pink); color:#fff; font-weight:600; font-size:1rem; cursor:pointer; }
+  .login-card button:hover{ background:var(--pink-deep); }
+  .login-error{ color:var(--pink-deep); font-size:0.85rem; min-height:18px; margin-bottom:8px; }
+
+  /* Toolbar */
+  .admin-toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .admin-toolbar h1{ font-size:1.4rem; margin:0; color:var(--ink); }
+  .btn{ padding:10px 16px; border-radius:var(--radius-sm); border:1px solid transparent; font-weight:600; font-size:0.9rem; cursor:pointer; }
+  .btn-primary{ background:var(--pink); color:#fff; }
+  .btn-primary:hover{ background:var(--pink-deep); }
+  .btn-secondary{ background:#fff; color:var(--ink); border-color:var(--gray-light); }
+  .btn-secondary:hover{ background:var(--gray-light); }
+  .btn-danger{ background:#fff; color:#c0392b; border-color:#f0c9c2; }
+  .btn-danger:hover{ background:#fdecea; }
+  .btn-sm{ padding:6px 10px; font-size:0.8rem; }
+
+  .save-banner{ background:#fdf1f5; border:1px solid var(--pink-light); color:var(--pink-deep); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:18px; font-size:0.88rem; display:none; }
+  .save-banner.show{ display:block; }
+
+  /* Table */
+  .admin-table-wrap{ background:#fff; border-radius:var(--radius-md); box-shadow:var(--shadow-card); overflow-x:auto; }
+  table.admin-table{ width:100%; border-collapse:collapse; font-size:0.88rem; min-width:760px; }
+  table.admin-table th{ text-align:left; padding:12px 14px; background:var(--blush); color:var(--ink); font-weight:600; border-bottom:1px solid var(--gray-light); }
+  table.admin-table td{ padding:10px 14px; border-bottom:1px solid var(--gray-light); vertical-align:middle; }
+  table.admin-table tr:last-child td{ border-bottom:none; }
+  .swatch{ width:16px; height:16px; border-radius:4px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .best-tag{ background:var(--gold); color:#fff; font-size:0.7rem; padding:2px 6px; border-radius:4px; }
+  .row-actions{ display:flex; gap:6px; }
+
+  /* Modal / form */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(20,10,20,0.45); display:none; align-items:center; justify-content:center; padding:16px; z-index:100; }
+  .modal-overlay.show{ display:flex; }
+  .modal{ background:#fff; border-radius:var(--radius-lg); padding:28px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; }
+  .modal h2{ margin:0 0 18px; font-size:1.15rem; color:var(--ink); }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:0.82rem; font-weight:600; color:var(--ink); margin-bottom:4px; }
+  .field input, .field select{ width:100%; padding:10px 12px; border:1px solid var(--gray-light); border-radius:var(--radius-sm); font-size:0.9rem; box-sizing:border-box; }
+  .field-row{ display:flex; gap:12px; }
+  .field-row .field{ flex:1; }
+  .field-check{ display:flex; align-items:center; gap:8px; }
+  .field-check input{ width:auto; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+
+  .empty-state{ text-align:center; padding:40px; color:var(--gray); }
+</style>
+</head>
+<body class="admin-body">
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <h1>Dilan Shop <em style="color:var(--pink)">Admin</em></h1>
+    <p>Enter the admin password to manage products.</p>
+    <div class="login-error" id="loginError"></div>
+    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+    <button type="button" id="loginBtn">Log in</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL (hidden until logged in) -->
+<div id="adminPanel" style="display:none;">
+  <div class="admin-header">
+    <a href="index.html"><span class="logo-main">Dilan<em>Shop</em></span></a>
+    <div style="display:flex; gap:16px; align-items:center;">
+      <a href="index.html" style="font-size:0.85rem; opacity:0.85;">View site</a>
+      <button class="btn btn-sm btn-secondary" id="logoutBtn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,0.4);">Log out</button>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+    <div class="admin-toolbar">
+      <h1>Products (<span id="productCount">0</span>)</h1>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-secondary" id="downloadBtn">Download products.js</button>
+        <button class="btn btn-secondary" id="resetBtn">Reset to default</button>
+        <button class="btn btn-primary" id="addBtn">+ Add product</button>
+      </div>
+    </div>
+
+    <div class="save-banner" id="saveBanner">
+      Changes are saved in this browser only. Click <strong>“Download products.js”</strong> and replace the file in your <code>js/</code> folder to make changes appear for every visitor.
+    </div>
+
+    <div class="admin-table-wrap">
+      <table class="admin-table" id="productTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Best seller</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="productTbody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">No products yet. Click "+ Add product" to create one.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Add product</h2>
+    <form id="productForm">
+      <input type="hidden" id="f_id_original">
+      <div class="field">
+        <label>Product name</label>
+        <input type="text" id="f_name" required placeholder="e.g. MAC Matte Lipstick — Ruby Woo">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Brand</label>
+          <input type="text" id="f_brand" required placeholder="e.g. MAC">
+        </div>
+        <div class="field">
+          <label>Price (IQD)</label>
+          <input type="number" id="f_price" required min="0" step="500" placeholder="26000">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Category</label>
+          <select id="f_category">
+            <option value="makeup">Makeup</option>
+            <option value="skincare">Skincare</option>
+            <option value="haircare">Haircare</option>
+            <option value="perfume">Perfume</option>
+            <option value="accessories">Accessories</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Icon</label>
+          <select id="f_icon">
+            <option value="bottle">Bottle</option>
+            <option value="lipstick">Lipstick</option>
+            <option value="lipgloss">Lip gloss</option>
+            <option value="palette">Palette</option>
+            <option value="mascara">Mascara</option>
+            <option value="dropper">Dropper</option>
+            <option value="perfume">Perfume</option>
+            <option value="jar">Jar</option>
+            <option value="brush">Brush</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Accent color</label>
+          <input type="color" id="f_accent" value="#c98a63" style="height:42px; padding:4px;">
+        </div>
+        <div class="field" style="display:flex; align-items:flex-end;">
+          <div class="field-check">
+            <input type="checkbox" id="f_bestseller">
+            <label style="margin:0;" for="f_bestseller">Show as best seller on homepage</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script>
+/* ================= Admin config ================= */
+// Change this password, then re-upload this file to your site.
+const ADMIN_PASSWORD = "dilan2026";
+const SESSION_KEY = "dilanshop_admin_session";
+const STORAGE_KEY = "dilanshop_products";
+
+/* ================= Auth ================= */
+const loginScreen = document.getElementById('loginScreen');
+const adminPanel = document.getElementById('adminPanel');
+const loginError = document.getElementById('loginError');
+
+function isLoggedIn(){
+  return sessionStorage.getItem(SESSION_KEY) === 'true';
+}
+function showApp(){
+  loginScreen.style.display = 'none';
+  adminPanel.style.display = 'block';
+  renderTable();
+}
+function showLogin(){
+  loginScreen.style.display = 'flex';
+  adminPanel.style.display = 'none';
+}
+document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key === 'Enter') attemptLogin(); });
+function attemptLogin(){
+  const val = document.getElementById('loginPassword').value;
+  if (val === ADMIN_PASSWORD){
+    sessionStorage.setItem(SESSION_KEY, 'true');
+    loginError.textContent = '';
+    showApp();
+  } else {
+    loginError.textContent = 'Incorrect password.';
+  }
+}
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  showLogin();
+});
+
+if (isLoggedIn()) { showApp(); } else { showLogin(); }
+
+/* ================= Product data helpers ================= */
+// PRODUCTS is loaded from js/products.js (already merged with any saved localStorage data).
+function persist(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(PRODUCTS));
+  document.getElementById('saveBanner').classList.add('show');
+}
+
+function fmtPrice(n){
+  return new Intl.NumberFormat('en-US').format(n);
+}
+
+function renderTable(){
+  const tbody = document.getElementById('productTbody');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('productCount').textContent = PRODUCTS.length;
+  if (!PRODUCTS.length){
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = PRODUCTS.map((p, idx) => `
+    <tr>
+      <td><span class="swatch" style="background:${p.accent}"></span></td>
+      <td>${escapeHtml(p.name)}</td>
+      <td>${escapeHtml(p.brand)}</td>
+      <td style="text-transform:capitalize">${p.category}</td>
+      <td>${fmtPrice(p.price)} IQD</td>
+      <td>${p.bestseller ? '<span class="best-tag">Best seller</span>' : ''}</td>
+      <td>
+        <div class="row-actions">
+          <button class="btn btn-sm btn-secondary" data-edit="${idx}">Edit</button>
+          <button class="btn btn-sm btn-danger" data-delete="${idx}">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', () => openModal(parseInt(btn.dataset.edit)));
+  });
+  tbody.querySelectorAll('[data-delete]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.delete);
+      if (confirm(`Delete "${PRODUCTS[idx].name}"?`)){
+        PRODUCTS.splice(idx, 1);
+        persist();
+        renderTable();
+      }
+    });
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ================= Modal (add/edit) ================= */
+const modalOverlay = document.getElementById('modalOverlay');
+const productForm = document.getElementById('productForm');
+let editingIndex = null;
+
+document.getElementById('addBtn').addEventListener('click', () => openModal(null));
+document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+
+function openModal(idx){
+  editingIndex = idx;
+  const isEdit = idx !== null;
+  document.getElementById('modalTitle').textContent = isEdit ? 'Edit product' : 'Add product';
+  if (isEdit){
+    const p = PRODUCTS[idx];
+    document.getElementById('f_name').value = p.name;
+    document.getElementById('f_brand').value = p.brand;
+    document.getElementById('f_price').value = p.price;
+    document.getElementById('f_category').value = p.category;
+    document.getElementById('f_icon').value = p.icon;
+    document.getElementById('f_accent').value = p.accent;
+    document.getElementById('f_bestseller').checked = !!p.bestseller;
+  } else {
+    productForm.reset();
+    document.getElementById('f_accent').value = '#c98a63';
+  }
+  modalOverlay.classList.add('show');
+}
+function closeModal(){
+  modalOverlay.classList.remove('show');
+  editingIndex = null;
+}
+
+function nextId(){
+  let max = 0;
+  PRODUCTS.forEach(p => {
+    const n = parseInt((p.id || '').replace(/\D/g, ''), 10);
+    if (!isNaN(n) && n > max) max = n;
+  });
+  return 'p' + String(max + 1).padStart(2, '0');
+}
+
+productForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById('f_name').value.trim(),
+    brand: document.getElementById('f_brand').value.trim(),
+    price: parseInt(document.getElementById('f_price').value, 10) || 0,
+    category: document.getElementById('f_category').value,
+    icon: document.getElementById('f_icon').value,
+    accent: document.getElementById('f_accent').value,
+    bestseller: document.getElementById('f_bestseller').checked
+  };
+  if (editingIndex !== null){
+    data.id = PRODUCTS[editingIndex].id;
+    PRODUCTS[editingIndex] = data;
+  } else {
+    data.id = nextId();
+    PRODUCTS.push(data);
+  }
+  persist();
+  renderTable();
+  closeModal();
+});
+
+/* ================= Toolbar actions ================= */
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Reset to the original product list? This removes all your saved changes in this browser.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+});
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const lines = PRODUCTS.map(p => {
+    const parts = [
+      `id: ${JSON.stringify(p.id)}`,
+      `name: ${JSON.stringify(p.name)}`,
+      `brand: ${JSON.stringify(p.brand)}`,
+      `price: ${p.price}`,
+      `category: ${JSON.stringify(p.category)}`,
+      `icon: ${JSON.stringify(p.icon)}`,
+      `accent: ${JSON.stringify(p.accent)}`
+    ];
+    if (p.bestseller) parts.push('bestseller: true');
+    return '  { ' + parts.join(', ') + ' }';
+  });
+  const fileContent = `// Dilan Shop — product catalog
+// icon refers to an inline SVG placeholder defined in app.js (renderIcon)
+const PRODUCTS = [
+${lines.join(',\n')}
+];
+`;
+  const blob = new Blob([fileContent], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'products.js';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
