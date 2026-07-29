@@ -111,11 +111,14 @@ function renderCategories(){
 function productCard(p){
   const wl = getWishlist();
   const isFav = wl.includes(p.id);
+  const media = p.photo
+    ? `<img src="${p.photo}" alt="${p.name}" loading="lazy">`
+    : `<span style="color:${p.accent}">${ICONS[p.icon] || ICONS.bottle}</span>`;
   return `
   <div class="product-card" data-id="${p.id}">
     <div class="product-thumb" style="background:${hexToBlush(p.accent)}">
       <button class="product-fav ${isFav?'active':''}" data-action="fav" data-id="${p.id}" aria-label="wishlist">${ic('heart')}</button>
-      <span style="color:${p.accent}">${ICONS[p.icon] || ICONS.bottle}</span>
+      ${media}
     </div>
     <div class="product-body">
       <span class="product-brand">${p.brand}</span>
