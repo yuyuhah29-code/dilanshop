@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
@@ -15,7 +15,6 @@
   .admin-header .logo-main em{ color:var(--pink-light); font-style:normal; }
   .admin-wrap{ max-width:1100px; margin:0 auto; padding:24px 16px 80px; }
 
-  /* Login screen */
   .login-screen{ min-height:70vh; display:flex; align-items:center; justify-content:center; padding:24px; }
   .login-card{ background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow-pop); padding:36px 32px; width:100%; max-width:360px; text-align:center; }
   .login-card h1{ font-size:1.3rem; margin:0 0 6px; color:var(--ink); }
@@ -25,7 +24,6 @@
   .login-card button:hover{ background:var(--pink-deep); }
   .login-error{ color:var(--pink-deep); font-size:0.85rem; min-height:18px; margin-bottom:8px; }
 
-  /* Toolbar */
   .admin-toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:20px; }
   .admin-toolbar h1{ font-size:1.4rem; margin:0; color:var(--ink); }
   .btn{ padding:10px 16px; border-radius:var(--radius-sm); border:1px solid transparent; font-weight:600; font-size:0.9rem; cursor:pointer; }
@@ -36,21 +34,21 @@
   .btn-danger{ background:#fff; color:#c0392b; border-color:#f0c9c2; }
   .btn-danger:hover{ background:#fdecea; }
   .btn-sm{ padding:6px 10px; font-size:0.8rem; }
+  .btn:disabled{ opacity:0.6; cursor:not-allowed; }
 
-  .save-banner{ background:#fdf1f5; border:1px solid var(--pink-light); color:var(--pink-deep); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:18px; font-size:0.88rem; display:none; }
-  .save-banner.show{ display:block; }
+  .status-banner{ background:#fdf1f5; border:1px solid var(--pink-light); color:var(--pink-deep); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:18px; font-size:0.88rem; display:none; }
+  .status-banner.show{ display:block; }
+  .status-banner.error{ background:#fdecea; border-color:#f0c9c2; color:#c0392b; }
 
-  /* Table */
   .admin-table-wrap{ background:#fff; border-radius:var(--radius-md); box-shadow:var(--shadow-card); overflow-x:auto; }
-  table.admin-table{ width:100%; border-collapse:collapse; font-size:0.88rem; min-width:760px; }
+  table.admin-table{ width:100%; border-collapse:collapse; font-size:0.88rem; min-width:800px; }
   table.admin-table th{ text-align:left; padding:12px 14px; background:var(--blush); color:var(--ink); font-weight:600; border-bottom:1px solid var(--gray-light); }
   table.admin-table td{ padding:10px 14px; border-bottom:1px solid var(--gray-light); vertical-align:middle; }
   table.admin-table tr:last-child td{ border-bottom:none; }
-  .swatch{ width:16px; height:16px; border-radius:4px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .thumb{ width:40px; height:40px; border-radius:8px; object-fit:cover; display:block; background:var(--gray-light); }
   .best-tag{ background:var(--gold); color:#fff; font-size:0.7rem; padding:2px 6px; border-radius:4px; }
   .row-actions{ display:flex; gap:6px; }
 
-  /* Modal / form */
   .modal-overlay{ position:fixed; inset:0; background:rgba(20,10,20,0.45); display:none; align-items:center; justify-content:center; padding:16px; z-index:100; }
   .modal-overlay.show{ display:flex; }
   .modal{ background:#fff; border-radius:var(--radius-lg); padding:28px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; }
@@ -63,13 +61,14 @@
   .field-check{ display:flex; align-items:center; gap:8px; }
   .field-check input{ width:auto; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+  .photo-preview{ width:100%; height:140px; object-fit:cover; border-radius:var(--radius-sm); margin-bottom:8px; display:none; background:var(--gray-light); }
+  .photo-preview.show{ display:block; }
 
   .empty-state{ text-align:center; padding:40px; color:var(--gray); }
 </style>
 </head>
 <body class="admin-body">
 
-<!-- LOGIN SCREEN -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <h1>Dilan Shop <em style="color:var(--pink)">Admin</em></h1>
@@ -80,7 +79,6 @@
   </div>
 </div>
 
-<!-- ADMIN PANEL (hidden until logged in) -->
 <div id="adminPanel" style="display:none;">
   <div class="admin-header">
     <a href="index.html"><span class="logo-main">Dilan<em>Shop</em></span></a>
@@ -93,22 +91,16 @@
   <div class="admin-wrap">
     <div class="admin-toolbar">
       <h1>Products (<span id="productCount">0</span>)</h1>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-secondary" id="downloadBtn">Download products.js</button>
-        <button class="btn btn-secondary" id="resetBtn">Reset to default</button>
-        <button class="btn btn-primary" id="addBtn">+ Add product</button>
-      </div>
+      <button class="btn btn-primary" id="addBtn">+ Add product</button>
     </div>
 
-    <div class="save-banner" id="saveBanner">
-      Changes are saved in this browser only. Click <strong>“Download products.js”</strong> and replace the file in your <code>js/</code> folder to make changes appear for every visitor.
-    </div>
+    <div class="status-banner" id="statusBanner"></div>
 
     <div class="admin-table-wrap">
       <table class="admin-table" id="productTable">
         <thead>
           <tr>
-            <th></th>
+            <th>Photo</th>
             <th>Name</th>
             <th>Brand</th>
             <th>Category</th>
@@ -124,12 +116,16 @@
   </div>
 </div>
 
-<!-- ADD/EDIT MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h2 id="modalTitle">Add product</h2>
     <form id="productForm">
       <input type="hidden" id="f_id_original">
+      <div class="field">
+        <label>Photo</label>
+        <img class="photo-preview" id="photoPreview" alt="Preview">
+        <input type="file" id="f_photo" accept="image/*">
+      </div>
       <div class="field">
         <label>Product name</label>
         <input type="text" id="f_name" required placeholder="e.g. MAC Matte Lipstick — Ruby Woo">
@@ -156,93 +152,102 @@
           </select>
         </div>
         <div class="field">
-          <label>Icon</label>
-          <select id="f_icon">
-            <option value="bottle">Bottle</option>
-            <option value="lipstick">Lipstick</option>
-            <option value="lipgloss">Lip gloss</option>
-            <option value="palette">Palette</option>
-            <option value="mascara">Mascara</option>
-            <option value="dropper">Dropper</option>
-            <option value="perfume">Perfume</option>
-            <option value="jar">Jar</option>
-            <option value="brush">Brush</option>
-          </select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
           <label>Accent color</label>
           <input type="color" id="f_accent" value="#c98a63" style="height:42px; padding:4px;">
         </div>
-        <div class="field" style="display:flex; align-items:flex-end;">
-          <div class="field-check">
-            <input type="checkbox" id="f_bestseller">
-            <label style="margin:0;" for="f_bestseller">Show as best seller on homepage</label>
-          </div>
-        </div>
+      </div>
+      <div class="field-check" style="margin-bottom:14px;">
+        <input type="checkbox" id="f_bestseller">
+        <label style="margin:0;" for="f_bestseller">Show as best seller on homepage</label>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save product</button>
+        <button type="submit" class="btn btn-primary" id="saveBtn">Save product</button>
       </div>
     </form>
   </div>
 </div>
 
-<script src="js/products.js"></script>
 <script>
-/* ================= Admin config ================= */
-// Change this password, then re-upload this file to your site.
-const ADMIN_PASSWORD = "dilan2026";
-const SESSION_KEY = "dilanshop_admin_session";
-const STORAGE_KEY = "dilanshop_products";
+/* ================= Config ================= */
+// Set this to your live Render backend URL after deploying it.
+const API_BASE_URL = "https://YOUR-BACKEND.onrender.com";
+const TOKEN_KEY = "dilanshop_admin_token";
+
+let PRODUCTS = [];
+let editingId = null;
+let pendingPhotoFile = null;
 
 /* ================= Auth ================= */
 const loginScreen = document.getElementById('loginScreen');
 const adminPanel = document.getElementById('adminPanel');
 const loginError = document.getElementById('loginError');
 
-function isLoggedIn(){
-  return sessionStorage.getItem(SESSION_KEY) === 'true';
+function getToken(){ return sessionStorage.getItem(TOKEN_KEY); }
+
+document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key === 'Enter') attemptLogin(); });
+
+async function attemptLogin(){
+  const password = document.getElementById('loginPassword').value;
+  loginError.textContent = '';
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (!res.ok) { loginError.textContent = data.error || 'Login failed'; return; }
+    sessionStorage.setItem(TOKEN_KEY, data.token);
+    showApp();
+  } catch (err) {
+    loginError.textContent = 'Could not reach the server. It may be waking up — try again in a moment.';
+  }
 }
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem(TOKEN_KEY);
+  showLogin();
+});
+
 function showApp(){
   loginScreen.style.display = 'none';
   adminPanel.style.display = 'block';
-  renderTable();
+  loadProducts();
 }
 function showLogin(){
   loginScreen.style.display = 'flex';
   adminPanel.style.display = 'none';
 }
-document.getElementById('loginBtn').addEventListener('click', attemptLogin);
-document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key === 'Enter') attemptLogin(); });
-function attemptLogin(){
-  const val = document.getElementById('loginPassword').value;
-  if (val === ADMIN_PASSWORD){
-    sessionStorage.setItem(SESSION_KEY, 'true');
-    loginError.textContent = '';
-    showApp();
-  } else {
-    loginError.textContent = 'Incorrect password.';
+
+if (getToken()) { showApp(); } else { showLogin(); }
+
+/* ================= Status banner ================= */
+function showStatus(msg, isError){
+  const el = document.getElementById('statusBanner');
+  el.textContent = msg;
+  el.className = 'status-banner show' + (isError ? ' error' : '');
+  if (!isError) setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ================= Load & render products ================= */
+async function loadProducts(){
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/products`);
+    PRODUCTS = await res.json();
+    renderTable();
+  } catch (err) {
+    showStatus('Could not load products from the server.', true);
   }
 }
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  sessionStorage.removeItem(SESSION_KEY);
-  showLogin();
-});
 
-if (isLoggedIn()) { showApp(); } else { showLogin(); }
+function fmtPrice(n){ return new Intl.NumberFormat('en-US').format(n); }
 
-/* ================= Product data helpers ================= */
-// PRODUCTS is loaded from js/products.js (already merged with any saved localStorage data).
-function persist(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(PRODUCTS));
-  document.getElementById('saveBanner').classList.add('show');
-}
-
-function fmtPrice(n){
-  return new Intl.NumberFormat('en-US').format(n);
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
 }
 
 function renderTable(){
@@ -255,9 +260,9 @@ function renderTable(){
     return;
   }
   empty.style.display = 'none';
-  tbody.innerHTML = PRODUCTS.map((p, idx) => `
+  tbody.innerHTML = PRODUCTS.map(p => `
     <tr>
-      <td><span class="swatch" style="background:${p.accent}"></span></td>
+      <td>${p.image ? `<img class="thumb" src="${p.image}" alt="">` : '<span class="thumb"></span>'}</td>
       <td>${escapeHtml(p.name)}</td>
       <td>${escapeHtml(p.brand)}</td>
       <td style="text-transform:capitalize">${p.category}</td>
@@ -265,135 +270,145 @@ function renderTable(){
       <td>${p.bestseller ? '<span class="best-tag">Best seller</span>' : ''}</td>
       <td>
         <div class="row-actions">
-          <button class="btn btn-sm btn-secondary" data-edit="${idx}">Edit</button>
-          <button class="btn btn-sm btn-danger" data-delete="${idx}">Delete</button>
+          <button class="btn btn-sm btn-secondary" data-edit="${p.id}">Edit</button>
+          <button class="btn btn-sm btn-danger" data-delete="${p.id}">Delete</button>
         </div>
       </td>
     </tr>
   `).join('');
 
   tbody.querySelectorAll('[data-edit]').forEach(btn => {
-    btn.addEventListener('click', () => openModal(parseInt(btn.dataset.edit)));
+    btn.addEventListener('click', () => openModal(btn.dataset.edit));
   });
   tbody.querySelectorAll('[data-delete]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.delete);
-      if (confirm(`Delete "${PRODUCTS[idx].name}"?`)){
-        PRODUCTS.splice(idx, 1);
-        persist();
-        renderTable();
-      }
-    });
+    btn.addEventListener('click', () => deleteProduct(btn.dataset.delete));
   });
 }
 
-function escapeHtml(str){
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+async function deleteProduct(id){
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!confirm(`Delete "${p ? p.name : id}"?`)) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${getToken()}` }
+    });
+    if (!res.ok) throw new Error();
+    showStatus('Product deleted.');
+    loadProducts();
+  } catch {
+    showStatus('Could not delete product.', true);
+  }
 }
 
 /* ================= Modal (add/edit) ================= */
 const modalOverlay = document.getElementById('modalOverlay');
 const productForm = document.getElementById('productForm');
-let editingIndex = null;
+const photoInput = document.getElementById('f_photo');
+const photoPreview = document.getElementById('photoPreview');
 
 document.getElementById('addBtn').addEventListener('click', () => openModal(null));
 document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
 
-function openModal(idx){
-  editingIndex = idx;
-  const isEdit = idx !== null;
+photoInput.addEventListener('change', () => {
+  const file = photoInput.files[0];
+  if (!file) return;
+  pendingPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    photoPreview.src = e.target.result;
+    photoPreview.classList.add('show');
+  };
+  reader.readAsDataURL(file);
+});
+
+function openModal(id){
+  editingId = id;
+  pendingPhotoFile = null;
+  const isEdit = id !== null;
   document.getElementById('modalTitle').textContent = isEdit ? 'Edit product' : 'Add product';
+  productForm.reset();
+  photoPreview.classList.remove('show');
   if (isEdit){
-    const p = PRODUCTS[idx];
+    const p = PRODUCTS.find(x => x.id === id);
     document.getElementById('f_name').value = p.name;
     document.getElementById('f_brand').value = p.brand;
     document.getElementById('f_price').value = p.price;
     document.getElementById('f_category').value = p.category;
-    document.getElementById('f_icon').value = p.icon;
-    document.getElementById('f_accent').value = p.accent;
+    document.getElementById('f_accent').value = p.accent || '#c98a63';
     document.getElementById('f_bestseller').checked = !!p.bestseller;
+    if (p.image){
+      photoPreview.src = p.image;
+      photoPreview.classList.add('show');
+    }
   } else {
-    productForm.reset();
     document.getElementById('f_accent').value = '#c98a63';
   }
   modalOverlay.classList.add('show');
 }
 function closeModal(){
   modalOverlay.classList.remove('show');
-  editingIndex = null;
+  editingId = null;
+  pendingPhotoFile = null;
 }
 
-function nextId(){
-  let max = 0;
-  PRODUCTS.forEach(p => {
-    const n = parseInt((p.id || '').replace(/\D/g, ''), 10);
-    if (!isNaN(n) && n > max) max = n;
-  });
-  return 'p' + String(max + 1).padStart(2, '0');
-}
-
-productForm.addEventListener('submit', e => {
+productForm.addEventListener('submit', async e => {
   e.preventDefault();
-  const data = {
-    name: document.getElementById('f_name').value.trim(),
-    brand: document.getElementById('f_brand').value.trim(),
-    price: parseInt(document.getElementById('f_price').value, 10) || 0,
-    category: document.getElementById('f_category').value,
-    icon: document.getElementById('f_icon').value,
-    accent: document.getElementById('f_accent').value,
-    bestseller: document.getElementById('f_bestseller').checked
-  };
-  if (editingIndex !== null){
-    data.id = PRODUCTS[editingIndex].id;
-    PRODUCTS[editingIndex] = data;
-  } else {
-    data.id = nextId();
-    PRODUCTS.push(data);
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+
+  try {
+    let imageUrl = editingId ? (PRODUCTS.find(x => x.id === editingId)?.image || '') : '';
+
+    // Upload photo first, if one was selected
+    if (pendingPhotoFile){
+      saveBtn.textContent = 'Uploading photo...';
+      const formData = new FormData();
+      formData.append('image', pendingPhotoFile);
+      const uploadRes = await fetch(`${API_BASE_URL}/api/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${getToken()}` },
+        body: formData
+      });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Photo upload failed');
+      imageUrl = uploadData.url;
+    }
+
+    const payload = {
+      name: document.getElementById('f_name').value.trim(),
+      brand: document.getElementById('f_brand').value.trim(),
+      price: parseInt(document.getElementById('f_price').value, 10) || 0,
+      category: document.getElementById('f_category').value,
+      accent: document.getElementById('f_accent').value,
+      bestseller: document.getElementById('f_bestseller').checked,
+      image: imageUrl
+    };
+
+    saveBtn.textContent = 'Saving product...';
+    const url = editingId ? `${API_BASE_URL}/api/products/${editingId}` : `${API_BASE_URL}/api/products`;
+    const method = editingId ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Save failed');
+
+    showStatus('Product saved.');
+    closeModal();
+    loadProducts();
+  } catch (err) {
+    showStatus(err.message || 'Something went wrong.', true);
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save product';
   }
-  persist();
-  renderTable();
-  closeModal();
-});
-
-/* ================= Toolbar actions ================= */
-document.getElementById('resetBtn').addEventListener('click', () => {
-  if (!confirm('Reset to the original product list? This removes all your saved changes in this browser.')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-});
-
-document.getElementById('downloadBtn').addEventListener('click', () => {
-  const lines = PRODUCTS.map(p => {
-    const parts = [
-      `id: ${JSON.stringify(p.id)}`,
-      `name: ${JSON.stringify(p.name)}`,
-      `brand: ${JSON.stringify(p.brand)}`,
-      `price: ${p.price}`,
-      `category: ${JSON.stringify(p.category)}`,
-      `icon: ${JSON.stringify(p.icon)}`,
-      `accent: ${JSON.stringify(p.accent)}`
-    ];
-    if (p.bestseller) parts.push('bestseller: true');
-    return '  { ' + parts.join(', ') + ' }';
-  });
-  const fileContent = `// Dilan Shop — product catalog
-// icon refers to an inline SVG placeholder defined in app.js (renderIcon)
-const PRODUCTS = [
-${lines.join(',\n')}
-];
-`;
-  const blob = new Blob([fileContent], { type: 'text/javascript' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'products.js';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 });
 </script>
 </body>
