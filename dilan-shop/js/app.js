@@ -401,4 +401,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   renderIconPlaceholders();
   initProductsPage();
   refreshAll();
+  // Swap in the live catalog from the backend once it's ready (falls back
+  // to the defaults above if the API is unreachable).
+  if (typeof loadProductsFromAPI === 'function'){
+    loadProductsFromAPI().then(refreshAll);
+  }
 });
